@@ -1,0 +1,23 @@
+﻿<Application 
+    x:Class="TrainerApp.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:TrainerApp"
+    xmlns:sys="clr-namespace:System;assembly=netstandard"
+    xmlns:generics="clr-namespace:System.Collections.Generic;assembly=netstandard"
+    xmlns:command="clr-namespace:TrainerApp.ViewModel.Commands"
+    xmlns:converter="clr-namespace:TrainerApp.Converter"
+    xmlns:viewmodel="clr-namespace:TrainerApp.ViewModel" 
+    StartupUri="View\TrainerWindow.xaml">
+    <Application.Resources>
+        <ResourceDictionary>
+            <viewmodel:TrainerViewModel x:Key="ViewModel"/>
+            <converter:NameToFontConverter x:Key="NameToFontConverter"/>
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+            <sys:Double x:Key="FontViewerWidth">720</sys:Double>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Style/Resources.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
