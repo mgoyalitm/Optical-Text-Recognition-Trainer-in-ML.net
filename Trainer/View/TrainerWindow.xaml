@@ -15,7 +15,7 @@
     Title="Model Trainer" 
     Height="800" 
     Width="1280">
-    
+
     <Window.InputBindings>
         <KeyBinding Key="Right" Command="{Binding ChangeFontCommand}">
             <KeyBinding.CommandParameter>
@@ -510,7 +510,12 @@
                 VerticalAlignment="Center" 
                 Margin="40,10"
                 Visibility="{Binding TrainModelCommand.IsLoading, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <TextBlock Margin="0,5" Text="Loading data..."/>
+                <TextBlock Margin="0,5" Text="Loading data (">
+                    <Run Text="{Binding TrainModelCommand.Current, Mode=OneWay}"/>
+                    <Run Text="of"/>
+                    <Run Text="{Binding  TrainModelCommand.Maximum, Mode=OneWay}"/>
+                    <Run Text=") ..."/>
+                </TextBlock>
                 <ProgressBar 
                     Width="400"
                     Height="5"
@@ -525,7 +530,7 @@
                 Margin="40,10"
                 Grid.Column="2"
                 Visibility="{Binding TrainModelCommand.IsTraining, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
-                
+
                 <TextBlock
                     HorizontalAlignment="Left"
                     VerticalAlignment="Center"
@@ -574,7 +579,11 @@
                                 <TextBlock Text="{Binding LogLossReduction,Mode=OneWay}" Grid.Row="1" Grid.Column="3"/>
                             </Grid>
                             <StackPanel x:Name="Progress" Visibility="Collapsed">
-                                <TextBlock Margin="0,5" Text="Loading data.."/>
+                                <TextBlock Margin="0,5" Text="Loading data">
+                                    <Run Text="{Binding Current, Mode=OneWay}"/>
+                                    <Run Text="of"/>
+                                    <Run Text="{Binding Maximum, Mode=OneWay}"/>
+                                </TextBlock>
                                 <ProgressBar 
                                     Width="400"
                                     Height="5"

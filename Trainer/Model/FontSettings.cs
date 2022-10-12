@@ -18,10 +18,10 @@ public readonly record struct FontSetting(
 {
     public FontSetting(IFontSetting settings) : this(settings.FontName, settings.UseNormalFont, settings.UseBoldFont, settings.UseItalicFont, settings.UseBoldItalicFont, settings.UseLowerCaseLetters, settings.UseUpperCaseLetters, settings.UseNumbers, settings.UseNormalFontRotation, settings.NormalFontMinRotation, settings.NormalFontMaxRotation, settings.UseItalicFontRotation, settings.ItalicFontMinRotation, settings.ItalicFontMaxRotation) { }
 
-    public const double RotationStep = 7.2d;
+    public const double RotationStep = 2.4d;
     public const string UpperCaseLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     public const string LowerCaseLetters = "abcdefghijklmnopqrstuvwxyz";
-    public const string Numbers = "0123456789";
+    public const string Numbers = "0123456789\\/-_⟋⟍⧵⁄╱╲⬥.<>‹› ";
     public int CharCount
     {
         get
@@ -36,7 +36,7 @@ public readonly record struct FontSetting(
 
             if (UseLowerCaseLetters) charCount += 26;
             if (UseUpperCaseLetters) charCount += 26;
-            if (UseNumbers) charCount += 10;
+            if (UseNumbers) charCount += 27;
 
             int rotationsCount = 0;
 

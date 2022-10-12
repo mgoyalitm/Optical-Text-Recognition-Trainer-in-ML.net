@@ -32,7 +32,7 @@ public class AppSettings
                 case EngineType.ImageClassification:
                     viewmodel.EngineSetting.UseImageClassification = true;
                     break;
-                case EngineType.LightGmb:
+                case EngineType.LightGbm:
                     viewmodel.EngineSetting.UseLightGmb = true;
                     break;
                 case EngineType.SdcaMaximumEntropy:

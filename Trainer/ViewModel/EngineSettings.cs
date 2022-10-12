@@ -126,7 +126,7 @@ public class EngineSetting : INotifyPropertyChanged
 
                 if (value == true)
                 {
-                    SelectedEngineType = EngineType.LightGmb;
+                    SelectedEngineType = EngineType.LightGbm;
                 }
             }
         }

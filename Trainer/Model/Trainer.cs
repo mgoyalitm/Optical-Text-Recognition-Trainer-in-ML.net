@@ -5,10 +5,14 @@ using Microsoft.ML.Transforms.Onnx;
 using OpenCvSharp;
 using Tensorflow;
 using Microsoft.ML.Trainers.LightGbm;
+using Microsoft.ML.Vision;
+
 namespace TrainerApp.Model;
 
 public class Trainer : ITrainer
 {
+    private static readonly Dictionary<char, int> minPixelsDictionary = new();
+    private static readonly Dictionary<char, int> maxPixelsDictionary = new();
     public void LoadModel(string path, EngineType engine)
     {
         Directory.CreateDirectory("models");
@@ -27,7 +31,7 @@ public class Trainer : ITrainer
     {
         progress.Current = 0;
         progress.Maximum = settings.Sum(x => x.CharCount);
-        
+
         MLContext context = new(seed: null);
 
         IDataView data = engine switch
@@ -39,19 +43,41 @@ public class Trainer : ITrainer
         EstimatorChain<ColumnConcatenatingTransformer> mapingPipeline = context.Transforms.Conversion.MapValueToKey(inputColumnName: "CharacterId", outputColumnName: "Label")
             .Append(context.Transforms.Concatenate("Features", nameof(CharacterData.Pixels)))
             .AppendCacheCheckpoint(context);
+
+        LightGbmMulticlassTrainer.Options options = new()
+        {
+            LearningRate = 0.45,
+            UseSoftmax = true,
+            UseZeroAsMissingValue = true,
+        };
+
+
         EstimatorChain<KeyToValueMappingTransformer> pipeline = engine switch
         {
             EngineType.SdcaNonCalibrated => mapingPipeline.Append(context.MulticlassClassification.Trainers.SdcaNonCalibrated("Label", "Features")).Append(context.Transforms.Conversion.MapKeyToValue("PredictedLabel")),
             EngineType.SdcaMaximumEntropy => mapingPipeline.Append(context.MulticlassClassification.Trainers.SdcaMaximumEntropy("Label", "Features")).Append(context.Transforms.Conversion.MapKeyToValue("PredictedLabel")),
             EngineType.LbfgsMaximumEntropy => mapingPipeline.Append(context.MulticlassClassification.Trainers.LbfgsMaximumEntropy("Label", "Features")).Append(context.Transforms.Conversion.MapKeyToValue("PredictedLabel")),
             EngineType.NaiveBayes => mapingPipeline.Append(context.MulticlassClassification.Trainers.NaiveBayes("Label", "Features")).Append(context.Transforms.Conversion.MapKeyToValue("PredictedLabel")),
-            EngineType.ImageClassification => mapingPipeline.Append(context.MulticlassClassification.Trainers.ImageClassification("Label", "Features")).Append(context.Transforms.Conversion.MapKeyToValue("PredictedLabel")),
-            EngineType.LightGmb => mapingPipeline.Append(context.MulticlassClassification.Trainers.LightGbm("Label", "Features")).Append(context.Transforms.Conversion.MapKeyToValue("PredictedLabel")),
+            EngineType.ImageClassification => mapingPipeline.Append(context.MulticlassClassification.Trainers.ImageClassification("Label", "Features"))
+                .Append(context.Transforms.Conversion.MapKeyToValue("PredictedLabel")),
+            EngineType.LightGbm => mapingPipeline.Append(context.MulticlassClassification.Trainers.LightGbm()).Append(context.Transforms.Conversion.MapKeyToValue("PredictedLabel")),
             _ => throw new NotImplementedException(),
-        };
+        }; ;
         TransformerChain<KeyToValueMappingTransformer> model = pipeline.Fit(data);
         Directory.CreateDirectory("models");
         context.Model.Save(model, data.Schema, $"models\\{engine}.onnx");
+
+        StringBuilder mapping = new();
+        foreach (char key in minPixelsDictionary.Keys)
+        {
+            mapping.Append(key);
+            mapping.Append('\t');
+            mapping.Append(minPixelsDictionary[key]);
+            mapping.Append('\t');
+            mapping.Append(maxPixelsDictionary.TryGetValue(key, out int value) ? value : '-');
+            mapping.AppendLine();
+        }
+        File.WriteAllText($"models\\{engine}.txt", mapping.ToString());
     }
 
     public void EvaluateAccuracy(FontSetting setting, EngineType engine, IAccuracyProgress progress)
@@ -69,7 +95,7 @@ public class Trainer : ITrainer
         if (engine == EngineType.ImageClassification)
         {
             using PredictionEngine<CharacterOpticalData, PredictionData> predictionEngine = context.Model.CreatePredictionEngine<CharacterOpticalData, PredictionData>(model, columns);
-            
+
             foreach (CharacterOpticalData character in GetOpticalTrainData(setting, progress))
             {
                 total++;
@@ -80,39 +106,38 @@ public class Trainer : ITrainer
         else
         {
             using PredictionEngine<CharacterData, PredictionData> predictionEngine = context.Model.CreatePredictionEngine<CharacterData, PredictionData>(model, columns);
-    
+
             foreach (CharacterData character in GetTrainData(setting, progress))
             {
                 total++;
                 PredictionData prediction = predictionEngine.Predict(character);
                 UpdateCorrectness(prediction.Score, character.CharacterId);
-               
+
             }
         }
-
         progress.Accuracy = float.Round(Convert.ToSingle(correct) / Convert.ToSingle(total), 2);
         progress.AverageScore = float.Round(correctness / Convert.ToSingle(total), 2);
 
-        static int GetCharacter(int id) => (id - (id % Alphabet.CharOffSet)) / Alphabet.CharOffSet;
         void UpdateCorrectness(float[] scores, int actual)
         {
             Dictionary<int, float> scoreDictionary = new();
             for (int i = 0; i < scores.Length; i++)
             {
-                int charId = GetCharacter(characterDictionary[i]);
+                int charId = characterDictionary[i];
                 if (scoreDictionary.ContainsKey(charId) == false)
                 {
                     scoreDictionary[charId] = 0;
                 }
                 scoreDictionary[charId] += scores[i];
             }
-            int id = GetCharacter(actual);
+            int id = actual;
+            float toatalscore = scores.Where(x => x > 0f).Sum();
             if (scoreDictionary.ContainsKey(id))
             {
-                if (scoreDictionary[id] > 0.25)
+                if (scoreDictionary[id] > 0.25 * toatalscore)
                 {
                     correct++;
-                    correctness += scoreDictionary[id];
+                    correctness += scoreDictionary[id] / toatalscore;
                 }
             }
         }
@@ -153,7 +178,7 @@ public class Trainer : ITrainer
             progress.MacroAccuracy = double.Round(metric.MacroAccuracy, 2);
         }
     }
-    private static Dictionary<int, int> GetCharDictionary(string path)
+    public static Dictionary<int, int> GetCharDictionary(string path)
     {
         Dictionary<int, int> dict = new();
         using ZipArchive zip = ZipFile.Open(path, ZipArchiveMode.Read);
@@ -191,11 +216,21 @@ public class Trainer : ITrainer
             using Mat mat = alphabet.Print();
             mat.GetArray(out byte[] data);
             progress.Current++;
-            yield return new CharacterData
+            float[] pixels = CharacterData.GetData(data);
+            if (pixels[62] > 10 || alphabet.Character == ' ')
             {
-                CharacterId = alphabet.CharacterId,
-                Pixels = data.Select(x => x == 0 ? 0f : 1f).ToArray()
-            };
+                minPixelsDictionary[alphabet.Character] = minPixelsDictionary.ContainsKey(alphabet.Character)
+                    ? Math.Min(minPixelsDictionary[alphabet.Character], (int)pixels[62])
+                    : (int)pixels[62];
+                maxPixelsDictionary[alphabet.Character] = maxPixelsDictionary.ContainsKey(alphabet.Character)
+                    ? Math.Max(maxPixelsDictionary[alphabet.Character], (int)pixels[62])
+                    : (int)pixels[62];
+                yield return new CharacterData
+                {
+                    CharacterId = alphabet.CharacterId,
+                    Pixels = pixels,
+                };
+            }
         }
     }
 
@@ -215,7 +250,8 @@ public class Trainer : ITrainer
         foreach (Alphabet alphabet in setting.GetAlphabets())
         {
             using Mat mat = alphabet.Print();
-
+            //Cv2.ImShow($"{alphabet.Character}", mat);
+            //Cv2.WaitKey();
             progress.Current++;
             yield return new CharacterOpticalData
             {

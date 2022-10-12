@@ -7,7 +7,7 @@ public enum EngineType
     LbfgsMaximumEntropy,
     NaiveBayes,
     ImageClassification,
-    LightGmb
+    LightGbm
 }
 
 public enum DrawStyle

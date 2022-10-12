@@ -7,27 +7,16 @@ namespace TrainerApp.Model;
 
 public readonly record struct Alphabet(string FontName, char Character, DrawStyle DrawStyle, double Rotation)
 {
-    public const int RenderSize = 16;
+    public const int RenderSize = 21;
     public const int CharOffSet = 100;
-    public int CharacterId 
-    {
-        get
-        {
-            int val = Character;
-            int rotation = Convert.ToInt32((Rotation + 180) / FontSetting.RotationStep);
-            
-
-            if (DrawStyle is DrawStyle.Italic or DrawStyle.BoldItalic)
-            {
-                rotation += 1;
-            }
-
-            return (val * CharOffSet) + rotation;
-        }
-    }
-
+    public int CharacterId => CharacterMapper.GetCharacterId(Character);
     public Mat Print()
     {
+        if (Character == ' ')
+        {
+            return new Mat(new Size(21, 21), MatType.CV_8UC1, new Scalar(255, 255, 255, 255));
+        }
+
         try
         {
             byte[] data = DrawImage();
@@ -35,7 +24,7 @@ public readonly record struct Alphabet(string FontName, char Character, DrawStyl
             using Mat gray = Cv2.ImDecode(data, ImreadModes.Grayscale);
             using Mat threshold = new();
 
-            Cv2.Threshold(gray, threshold, 200, 255, ThresholdTypes.Binary);
+            Cv2.Threshold(gray, threshold, 210, 255, ThresholdTypes.Binary);
 
             Rect rect = GetBoundingBox(threshold);
 
