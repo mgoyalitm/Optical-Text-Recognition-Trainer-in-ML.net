@@ -24,7 +24,7 @@ public readonly record struct Alphabet(string FontName, char Character, DrawStyl
             using Mat gray = Cv2.ImDecode(data, ImreadModes.Grayscale);
             using Mat threshold = new();
 
-            Cv2.Threshold(gray, threshold, 210, 255, ThresholdTypes.Binary);
+            Cv2.Threshold(gray, threshold, 200, 255, ThresholdTypes.Binary);
 
             Rect rect = GetBoundingBox(threshold);
 
@@ -49,7 +49,7 @@ public readonly record struct Alphabet(string FontName, char Character, DrawStyl
 
     private static Rect GetBoundingBox(Mat threshold)
     {
-        Cv2.FindContours(threshold, out Point[][] contours, out _, RetrievalModes.List, ContourApproximationModes.ApproxTC89KCOS);
+        Cv2.FindContours(threshold, out Point[][] contours, out _, RetrievalModes.List, ContourApproximationModes.ApproxNone);
         return Cv2.BoundingRect(contours.OrderByDescending(x => GetArea(x)).Skip(1).First());
         
         static double GetArea(Point[] contour) => Cv2.ContourArea(contour);
@@ -85,19 +85,19 @@ public readonly record struct Alphabet(string FontName, char Character, DrawStyl
             textToFormat: $"{Character}",
             culture: CultureInfo.GetCultureInfo("en-us"),
             flowDirection: System.Windows.FlowDirection.LeftToRight,
-            typeface: new Typeface(new FontFamily(FontName), style, weight, default), 32, Brushes.Black, 96)
+            typeface: new Typeface(new FontFamily(FontName), style, weight, default), 48, Brushes.Black, 96)
         {
             TextAlignment = System.Windows.TextAlignment.Center,
         };
 
-        drawing.PushTransform(new RotateTransform(Rotation, 32, 32));
-        drawing.DrawRectangle(Brushes.White, null, new System.Windows.Rect(0, 0, 64, 64));
+        drawing.PushTransform(new RotateTransform(Rotation, 48, 48));
+        drawing.DrawRectangle(Brushes.White, null, new System.Windows.Rect(0, 0, 96, 96));
         
-        drawing.DrawText(text, new System.Windows.Point(32, 16));
+        drawing.DrawText(text, new System.Windows.Point(48, 24));
         drawing.Close();
 
 
-        RenderTargetBitmap renderTargetBitmap = new(64, 64, 96, 96, PixelFormats.Pbgra32);
+        RenderTargetBitmap renderTargetBitmap = new(96, 96, 96, 96, PixelFormats.Pbgra32);
         renderTargetBitmap.Render(visual);
 
         BmpBitmapEncoder png = new();

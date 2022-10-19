@@ -11,6 +11,7 @@ namespace TrainerApp.Model;
 
 public class Trainer : ITrainer
 {
+    private const int RetrainFactor = 1;
     private static readonly Dictionary<char, int> minPixelsDictionary = new();
     private static readonly Dictionary<char, int> maxPixelsDictionary = new();
     public void LoadModel(string path, EngineType engine)
@@ -30,7 +31,7 @@ public class Trainer : ITrainer
     public void Train(IEnumerable<FontSetting> settings, EngineType engine, ITrainingProgress progress)
     {
         progress.Current = 0;
-        progress.Maximum = settings.Sum(x => x.CharCount);
+        progress.Maximum = RetrainFactor * settings.Sum(x => x.CharCount);
 
         MLContext context = new(seed: null);
 
@@ -219,12 +220,24 @@ public class Trainer : ITrainer
             float[] pixels = CharacterData.GetData(data);
             if (pixels[62] > 10 || alphabet.Character == ' ')
             {
-                minPixelsDictionary[alphabet.Character] = minPixelsDictionary.ContainsKey(alphabet.Character)
-                    ? Math.Min(minPixelsDictionary[alphabet.Character], (int)pixels[62])
-                    : (int)pixels[62];
-                maxPixelsDictionary[alphabet.Character] = maxPixelsDictionary.ContainsKey(alphabet.Character)
-                    ? Math.Max(maxPixelsDictionary[alphabet.Character], (int)pixels[62])
-                    : (int)pixels[62];
+                if (minPixelsDictionary.TryGetValue(alphabet.Character, out int value1))
+                {
+                    minPixelsDictionary[alphabet.Character] = Math.Min(value1, (int)pixels[62]);
+                }
+                else
+                {
+                    minPixelsDictionary[alphabet.Character] = (int)pixels[62];
+                }
+
+                if (maxPixelsDictionary.TryGetValue(alphabet.Character, out int value2))
+                {
+                    maxPixelsDictionary[alphabet.Character] = Math.Max(value2, (int)pixels[62]);
+                }
+                else
+                {
+                    maxPixelsDictionary[alphabet.Character] = (int)pixels[62];
+                }
+                
                 yield return new CharacterData
                 {
                     CharacterId = alphabet.CharacterId,
@@ -236,18 +249,21 @@ public class Trainer : ITrainer
 
     private static IEnumerable<CharacterData> GetTrainData(IEnumerable<FontSetting> settings, IProgress progress)
     {
-        foreach (FontSetting setting in settings)
+        for (int i = 0; i < RetrainFactor; i++)
         {
-            foreach (CharacterData data in GetTrainData(setting, progress))
+            foreach (FontSetting setting in settings.OrderBy(x => Random.Shared.Next()))
             {
-                yield return data;
+                foreach (CharacterData data in GetTrainData(setting, progress))
+                {
+                    yield return data;
+                }
             }
         }
     }
 
     private static IEnumerable<CharacterOpticalData> GetOpticalTrainData(FontSetting setting, IProgress progress)
     {
-        foreach (Alphabet alphabet in setting.GetAlphabets())
+        foreach (Alphabet alphabet in setting.GetAlphabets().OrderBy(x => Random.Shared.Next()))
         {
             using Mat mat = alphabet.Print();
             //Cv2.ImShow($"{alphabet.Character}", mat);
@@ -263,11 +279,14 @@ public class Trainer : ITrainer
 
     private static IEnumerable<CharacterOpticalData> GetOpticalTrainData(IEnumerable<FontSetting> settings, IProgress progress)
     {
-        foreach (FontSetting setting in settings)
+        for (int i = 0; i < RetrainFactor; i++)
         {
-            foreach (CharacterOpticalData data in GetOpticalTrainData(setting, progress))
+            foreach (FontSetting setting in settings)
             {
-                yield return data;
+                foreach (CharacterOpticalData data in GetOpticalTrainData(setting, progress))
+                {
+                    yield return data;
+                }
             }
         }
     }
