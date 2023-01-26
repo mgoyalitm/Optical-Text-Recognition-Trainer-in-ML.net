@@ -440,7 +440,7 @@
                     GroupName="Engine"
                     Margin="0,3"
                     IsChecked="{Binding EngineSetting.UseImageClassification, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                    Content="Image classification"/>
+                    Content="Tensorflow"/>
             </StackPanel>
         </WrapPanel>
         <Grid Grid.Column="2"  Margin="20" Grid.Row="1">
