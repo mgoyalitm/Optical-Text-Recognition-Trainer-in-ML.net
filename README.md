@@ -24,7 +24,7 @@ The most efficient algorithm for character recognition is surprisingly Light gra
 * **Shit + DELETE** - Empty font cart.
 * **F5** - Train model for fonts in cart for selected engine.
 * **F8** - Test Accuracy (Not Recommended - Buggy)
-* **F9** - Test selected model for selected font in font panel for settings in setting panel.
+* **F9** - Test selected model against selected font in font panel for current fonts settings.
 
 ## MIT LICENSE
 
