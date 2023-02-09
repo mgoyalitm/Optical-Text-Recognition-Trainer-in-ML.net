@@ -21,9 +21,9 @@ The most efficient algorithm for character recognition is surprisingly Light gra
 * **DELETE** - Delete font shown in font panel from cart.
 * **FORWARD ARROW KEY** - Show next system font in font panel.
 * **BACKWARD ARROW KEY** - Show previous system font in font panel.
-* **Shit + DELETE** - Empty font cart.
+* **Shift + DELETE** - Empty font cart.
 * **F5** - Train model for fonts in cart for selected engine.
-* **F8** - Test Accuracy (Not Recommended - Buggy)
+* **F8** - Test Accuracy (Not Recommended and inaccurate calculation in some engines)
 * **F9** - Test selected model against selected font in font panel for current fonts settings.
 
 ## MIT LICENSE
