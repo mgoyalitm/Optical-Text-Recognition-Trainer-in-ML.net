@@ -1,37 +1,61 @@
-![ScreenShot](https://i.ibb.co/pQgHy39/App-ML.png)
+# 🧠 Optical Text Recognition Trainer in ML.NET
 
-# Optical Text Recognition Trainer in ML.Net
+![Screenshot](https://i.ibb.co/pQgHy39/App-ML.png)
 
-Single window WPF application that can train a model for optical text recognition using 6 different machine learning algorithms viz SDCA maximum entropy, SDCA non-calibrated, Limited memory BFGS, Naive Bayes, Light gradient boosting machine, and Tensorflow. The application allows the user to choose the fonts available locally on the user's machine, the application generates optical data for selected characters which are then used as training data for model training. The application allows users to set minimum and maximum rotations for generating optical character data for training.
-The most efficient algorithm for character recognition is surprisingly Light gradient boosting machine, not Tensorflow, surprisingly character recognition accuracy of the trained model is far far better than google's tesseract engine. No claim is meaningful without supporting data:
+A single-window WPF application to train custom OCR models using ML.NET. Supports multiple machine learning algorithms including:
 
-![Statistics](https://i.ibb.co/rHScR48/Accuracy.png "Accuracy")
+- SDCA (maximum entropy and non-calibrated)
+- Limited memory BFGS
+- Naive Bayes
+- LightGBM
+- TensorFlow
 
-## Short tutorial
-* On left panel you can view and browse fonts available on your system. 
-* Hit enter to add font with current settings to cart on right panel.
-* Use left and right arrow key for next and previous font selected.
-* Select the settings for training generation in center panel.
-* Press F5 for training model with selected engine/algorithm. 
-* Progress of training can be checked on lower right corner
-* Press F9 to test the selected font panel
+The application generates optical data from system-installed fonts and supports training on rotated glyphs to boost recognition accuracy. Testing showed that **LightGBM outperforms even Google’s Tesseract** in domain-specific OCR accuracy.
 
-## Shortcuts 
-* **ENTER** - Add font to cart
-* **DELETE** - Delete font shown in font panel from cart.
-* **FORWARD ARROW KEY** - Show next system font in font panel.
-* **BACKWARD ARROW KEY** - Show previous system font in font panel.
-* **Shift + DELETE** - Empty font cart.
-* **F5** - Train model for fonts in cart for selected engine.
-* **F8** - Test Accuracy (Not Recommended - inaccurate calculation in some engines)
-* **F9** - Test selected model against selected font in font panel for current fonts settings.
+![Accuracy Stats](https://i.ibb.co/rHScR48/Accuracy.png "Accuracy")
 
-## MIT LICENSE
+---
 
-Copyright (c) 2023 Mahendra Goyal
+## 🚀 Features
+
+- Choose fonts installed on your system
+- Customize character rotation for training data
+- Train with 6 different algorithms
+- Live font cart and training status
+- Quick testing with visual results
+
+---
+
+## 🧪 Quick Tutorial
+
+- 📂 **Font Browser** (left): browse and preview fonts
+- 🛒 **Cart Panel** (right): add fonts for training
+- ⚙️ **Settings Panel** (center): configure rotation and algorithm
+- 🔄 **F5**: Train the model with selected engine and font cart
+- 🧪 **F9**: Test selected model against current font settings
+
+---
+
+## ⌨️ Keyboard Shortcuts
+
+| Key | Action |
+|-----|--------|
+| `ENTER` | Add current font to cart |
+| `DELETE` | Remove current font from cart |
+| `→` / `←` | Navigate next/previous font |
+| `Shift + DELETE` | Clear the entire font cart |
+| `F5` | Train model |
+| `F8` | Test accuracy (not recommended) |
+| `F9` | Test selected font model |
+
+---
+
+## 📄 License
+
+MIT License © 2023 Mahendra Goyal
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+> The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+**THE SOFTWARE IS PROVIDED "AS IS"**, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
